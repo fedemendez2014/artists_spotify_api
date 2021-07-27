@@ -1,11 +1,26 @@
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
+import albums from './routes/albums';
 
+/**
+ * Inicializo express
+ */
 const app = express();
 
-const PORT = 8000;
+/**
+ * Middleware para manejo de excepciones
+ */
+app.use((err: Error, req: Request, resp: Response, next: NextFunction) => {
+  resp.status(500).json({ mesage: err.message });
+});
 
-app.get('/', (req, res) => res.send('It working!!'));
+/**
+ * Rutas
+ */
+app.use('/albums', albums);
 
-app.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
+/**
+ * 
+ */
+app.listen(8000, () => {
+  console.log(`Server is running`);
 });
