@@ -7,10 +7,14 @@ import albums from './routes/albums';
 const app = express();
 
 /**
- * Middleware para manejo de excepciones
+ * CORS middleware
  */
-app.use((err: Error, req: Request, resp: Response, next: NextFunction) => {
-  resp.status(500).json({ mesage: err.message });
+app.use((req, resp, next) => {
+  resp.header('Access-Control-Allow-Origin', '*');
+  resp.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
+  resp.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+  resp.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
+  next();
 });
 
 /**
