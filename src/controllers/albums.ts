@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { Album } from '../models/Album';
 import { Artist } from '../models/Artist';
-import { getArtists, getArtistAlbums, getAllAlbums } from '../services/spotify';
+import { getArtists, getArtistAlbums, getAllAlbums } from '../services/Spotify';
 
 /**
  * Dado un nombre de un artista devuelve los albums relacionados 
