@@ -1,32 +1,55 @@
 import { RequestHandler } from 'express';
 import { Album } from '../models/Album';
 import { Artist } from '../models/Artist';
-
-const artists: Artist[] = [
-    new Artist(Math.random().toString(), 'Wanda Jackson', []),
-    new Artist(Math.random().toString(), 'Charlie Te Marama', [])
-];
-
-const albums: Album[] = [
-    new Album('1', artists[0], 'album1', 10, new Date('2021-05-28'), []),
-    new Album('2', artists[1], 'album2', 15, new Date('2021-03-15'), [])
-];
+import { getArtists, getArtistAlbums, getAllAlbums } from '../services/spotify';
 
 /**
  * Dado un nombre de un artista devuelve los albums relacionados 
  */
-export const getAlbums: RequestHandler<{ artistName: string }> = (req, res, next) => {
-    const artistName = req.params.artistName;
-    const index = artists.findIndex(item => item.name === artistName);
-    if (index < 0) {
-        throw new Error('No se encontró ningun artista con el nombre indicado');
-    }
-    const artist = artists[index];
-    let _albums: Album[] = [];
-    albums.forEach(item => {
-        if (item.artist === artist) {
-            _albums.push(item);
+export const getAlbums: RequestHandler<{ artistName: string }> = async (req, res, next) => {
+    try {
+        const { artistName } = req.params;
+
+        // Obtengo los artistas que coinciden con el nombre dado
+        const artists = await getArtists(artistName);
+        if (artists.length === 0) {
+            throw new Error('No se encontró ningun artista con el nombre indicado');
         }
-    });
-    res.status(200).json({ albums: _albums });
+        const artist = Artist.createFromObject(artists[0]);
+
+        // Me quedo con el primer artista de la lista y busco los albums relacionados al mismo
+        let albums = await getArtistAlbums(artist.id);
+        let albumsIds: any[] = [];
+        for (let item of albums) {
+            albumsIds.push(item.id);
+        }
+
+        // Como el listado anterior no devuelve la popularidad, junto los ids y hago una nueva busqueda 
+        // al endpoint de albums
+        albums = await getAllAlbums(albumsIds.toString());
+        let albumsResult: Album[] = [];
+        for (let item of albums) {
+            albumsResult.push(Album.createFromArray(item));
+        }
+
+        // Ordeno popularidad de forma desc
+        albumsResult.sort((a, b) => {
+            if (a.popularity > b.popularity) {
+                return -1;
+            }
+            if (a.popularity < b.popularity) {
+                return 1;
+            }
+            return 0;
+        });
+
+        res.status(200).json({
+            albums: albumsResult,
+            artist: artist
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            error: error.message
+        });
+    }
 };
