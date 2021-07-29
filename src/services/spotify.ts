@@ -1,6 +1,6 @@
 import axios from 'axios';
 import querystring from 'querystring';
-import { Constants } from '../constants';
+import { Constants } from '../Constants';
 
 /**
  * @param artistName 
@@ -100,7 +100,12 @@ const setCurrentSession = (session: any) => {
 }
 
 const getCurrentSession = () => {
-    let session = localStorage.getItem(Constants.SPOTIFY_SESSION_NAME_FILE);
+    let session = null;
+    try {
+        session = localStorage.getItem(Constants.SPOTIFY_SESSION_NAME_FILE);
+    } catch (error) {
+        session = null;
+    }
     if (session === null) {
         getToken();
         session = localStorage.getItem(Constants.SPOTIFY_SESSION_NAME_FILE);
