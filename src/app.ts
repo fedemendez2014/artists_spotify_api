@@ -22,11 +22,7 @@ app.use((req: Request, resp: Response, next: NextFunction) => {
  * Middleware para loguear las peticiones que llegan
  */
 app.use(async (req: Request, resp: Response, next: NextFunction) => {
-  try {
-    saveLog(req.ip, req.url);
-  } catch (error) {
-    throw error;
-  }
+  saveLog(req.ip, req.url);
   next();
 });
 
